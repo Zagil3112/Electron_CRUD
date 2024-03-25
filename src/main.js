@@ -1,7 +1,8 @@
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = 'dev';
 const isDev = process.env.NODE_ENV !== 'production';
-const {BrowserWindow, Notification} = require('electron');
+const {BrowserWindow, Notification,ipcMain} = require('electron');
 const {getConnection} = require('./database')
+const path = require('path');
 
 let window
 
@@ -61,7 +62,9 @@ function createWindow() {
         width: isDev ? 1200 :800,
         height: 600,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true
         }
     });
     // Open devTools if in dev env
@@ -73,6 +76,8 @@ function createWindow() {
 
 
 
+
+
 module.exports = {
     createWindow,
     createProduct,
@@ -81,3 +86,30 @@ module.exports = {
     getProductById,
     updateProduct
 }
+
+// Test ipcRender ipcMain
+
+//Respond to ipcRenderer create product 
+/*
+ipcMain.on('product:create', (e,options) => {
+    console.log("Accediendo al main");
+    //console.log(options);
+
+    return createProduct(options);  
+
+
+
+});
+*/
+
+// Main process
+ipcMain.handle('product:create', async (e, options) => {
+    const result = await createProduct(options);
+    return result
+})
+
+ipcMain.handle('product:get', async (e, options) => {
+    const result = await getProducts();
+    return result
+})
+/////////////////////////////////

@@ -8,8 +8,8 @@ app.whenReady().then( () => {
     createWindow();
 
     // Implement Menu
-    //const mainMenu = Menu.buildFromTemplate(menu);
-    //Menu.setApplicationMenu(mainMenu);
+    const mainMenu = Menu.buildFromTemplate(menu);
+    Menu.setApplicationMenu(mainMenu);
 
 })
 

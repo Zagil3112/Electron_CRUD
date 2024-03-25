@@ -1,11 +1,9 @@
-
-
 //Capturar el formulario
 const productForm = document.getElementById('productForm');
 
 // Exponer las funciones de main.js
-//const {remote} = require('electron');
-//const main = remote.require('./main');
+const {remote} = require('electron');
+const main = remote.require('./main');
 
 //Capturar datos de los elementos del formulario
 const productName = document.getElementById('name');
@@ -16,7 +14,8 @@ const productDescription = document.getElementById('description');
 const productsList = document.getElementById("products");
 
 let products = [];
-
+let editingStatus = false;
+let editProductId;
 
 productForm.addEventListener('submit', async(e) => {
     try {
@@ -27,17 +26,14 @@ productForm.addEventListener('submit', async(e) => {
             description: productDescription.value
         }
 
-
-        // Enviar datos a main
-        //ipcRendererSender.send('product:create',newProduct);
-
-        ipcRendererSender.invoke('product:create', newProduct).then((result) => {
+        if (!editingStatus){
+            const result = await main.createProduct(newProduct); 
             console.log(result);
-        })
-        
-        //const result = await main.createProduct(newProduct); 
-        //console.log(result);      
-        
+        } else {
+            await main.updateProduct(editProductId,newProduct);
+            editingStatus = false;
+            editProductId = "";
+        }
 
         productForm.reset();
         productName.focus();  
@@ -48,6 +44,26 @@ productForm.addEventListener('submit', async(e) => {
     
 });
 
+async function deleteProducts(id){
+    const response = confirm("Are you sure you want to delete it?");
+
+    if (response){
+        await main.deleteProducts(id);
+        await getProducts();
+    }
+    return;
+}
+
+async function editProduct(id){
+
+    const product=  await main.getProductById(id);
+    productName.value = product.name;
+    productPrice.value = product.price;
+    productDescription.value = product.description;
+
+    editingStatus = true;
+    editProductId = id;
+};
 
 
 function renderProducts(products){
@@ -59,11 +75,11 @@ function renderProducts(products){
                 <p>${product.description}</p>
                 <h3>${product.price}</h3>
                 <p>
-                    <button class = "btn btn-danger btn-sm">
-                        USELESS
+                    <button class = "btn btn-danger btn-sm" onclick="deleteProducts('${product.id}')">
+                        DELETE
                     </button>
-                    <button class = "btn btn-secondary btn-sm">
-                        USELESS
+                    <button class = "btn btn-secondary btn-sm" onclick="editProduct('${product.id}')">
+                        EDIT
                     </button>
                 </p>
             </div>
@@ -73,11 +89,7 @@ function renderProducts(products){
 
 
 const getProducts = async () => {
-    ipcRendererSender.invoke('product:get').then((products) => {
-        renderProducts(products);
-        
-    })
-    //products = await main.getProducts(); 
+    products = await main.getProducts(); 
     renderProducts(products);   
 
 }
