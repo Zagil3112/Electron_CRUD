@@ -9,7 +9,7 @@ let window
 async function getProducts(){
     const conn = await getConnection();
     const results = await conn.query("SELECT * FROM product ORDER BY id DESC");
-    console.log(results);
+    //console.log(results);
     return results;
 }
 
@@ -39,20 +39,28 @@ async function deleteProducts(id){
     const result = await conn.query('DELETE FROM product WHERE id =?',id);
     console.log(result);
     return result;
-
 }
 
 async function getProductById(id){
     const conn = await getConnection();
     const result = await conn.query('SELECT * FROM product WHERE id = ?',id);
     console.log(result[0]);
+    console.log("obteniendo campos");
     return result[0];
+}
+
+async function filterProductByName(searchString){
+    const conn = await getConnection();
+    const result = await conn.query(`SELECT * FROM product WHERE lower(name) like '%${searchString}%'`);
+    
+    return result;
 }
 
 async function updateProduct(id,product){
 
     const conn = await getConnection();
     const result = await conn.query('UPDATE product SET ? WHERE id = ?',[product,id]);
+    console.log("Actualizando...");
     console.log(result);
     
 }
@@ -60,7 +68,7 @@ async function updateProduct(id,product){
 function createWindow() {
     window = new BrowserWindow({
         width: isDev ? 1200 :800,
-        height: 600,
+        height: 700,
         webPreferences: {
             nodeIntegration: true,
             preload: path.join(__dirname, 'preload.js'),
@@ -102,14 +110,40 @@ ipcMain.on('product:create', (e,options) => {
 });
 */
 
-// Main process
+// Create product
 ipcMain.handle('product:create', async (e, options) => {
     const result = await createProduct(options);
     return result
 })
 
+// Get products
 ipcMain.handle('product:get', async (e, options) => {
     const result = await getProducts();
     return result
 })
+
+// Delete products 
+ipcMain.on('product:delete', (e,options) => {
+    deleteProducts(options);
+});
+
+// Get by Id
+ipcMain.handle('product:getById', async (e, options) => {
+    result = getProductById(options);
+    return result
+})
+
+// Update product
+ipcMain.on('product:update', (e,options) => {
+    console.log("Optiones update")
+    console.log(options)
+    updateProduct(options.editProductId,options.newProduct)
+});
+
+// Filter product
+ipcMain.handle('product:filter', async (e, options) => {
+    result = filterProductByName(options);
+    return result
+})
+
 /////////////////////////////////
