@@ -19,6 +19,46 @@ let editingStatus = false;
 let searchString; 
 let searchingFlag = false; 
 
+// Iluminar producto
+
+
+
+function enlightProducts(){
+   
+    
+    var elms = productsList.getElementsByClassName("card card-body my-2 animated fadeInLeft");
+    console.log("enlightProducts");
+    for (var i = 0; i < elms.length; i++) {
+
+        elms[i].addEventListener("click", function() {
+        
+            elms[i].style.backgroundColor = 'green';
+            console.log("inside for")
+        });
+    }   
+        
+    
+}
+
+
+
+
+    
+    
+
+
+function focus(e) {
+    e.classList.add('focus');
+}
+function blur(e) {
+    e.classList.remove('focus');
+}
+
+
+
+
+// Barra de busqueda
+
 searchBar.addEventListener('input', evt => {
     evt.preventDefault(); // Evitar que se refresque la app
     const value = searchBar.value
@@ -118,7 +158,7 @@ function renderProducts(products){
     productsList.innerHTML ='';
     products.forEach((product) => {
         productsList.innerHTML+= `
-            <div class = "card card-body my-2 animated fadeInLeft">
+            <div class = "card card-body my-2 animated fadeInLeft" id = 'prd_${product.id}'>
                 <h4>${product.name}</h4>
                 <p>${product.description}</p>
                 <h3>${product.price}</h3>
@@ -150,7 +190,8 @@ const getProducts = async () => {
 
     searchingFlag = false;
     //products = await main.getProducts(); 
-    //renderProducts(products);   
+    //renderProducts(products);
+    enlightProducts();
 
 }
 

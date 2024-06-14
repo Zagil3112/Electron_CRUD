@@ -63,3 +63,7 @@ body{
       border: 1px solid #ccc;
     }
   }
+
+  div:focus, div.focus { /* :focus is a fallback in case JS is disabled */
+    outline: 1px solid blue;
+}
